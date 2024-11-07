@@ -1,36 +1,96 @@
 package fr.jikosoft.managers;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class SocketManager {
+import fr.jikosoft.kernel.Conversions;
 
-    private static final String SERVER_URL = "localhost";
-    private static final int PORT = 4443;
+public class SocketManager implements Runnable {
+	private static final String SERVER_URL = "localhost";
+	private static final int PORT = 4444;
+	private BufferedReader reader;
+	private PrintWriter writer;
+	private Thread thread;
+	private Socket socket;
+	private Status status;
 
-    public static String sendMessage(String message) {
-        try (Socket socket = new Socket(SERVER_URL, PORT);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+	private String hash;
 
-            System.out.println("Connected to the server at " + SERVER_URL + ":" + PORT);
+	public SocketManager() {
+		try {
+			this.socket = new Socket(SERVER_URL, PORT);
+			this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+			this.writer = new PrintWriter(this.socket.getOutputStream());
+			
+			this.thread = new Thread(this);
+			this.thread.start();
+		} catch(IOException e) {
+			System.out.println("Unable to connect to the server: " + e.getMessage());
+		}
+	}
 
-            // Send the message
-            out.println(message);
-            System.out.println("Sent to server: " + message);
+	@Override
+	public void run() {
+		try {
+			String packet = "";
+			char[] charCur = new char[1];
+			this.status = Status.wait_hash;
+			
+			while(this.reader.read(charCur, 0, 1) != -1) {
+				if (charCur[0] != '\u0000' && charCur[0] != '\n' && charCur[0] != '\r') packet += charCur[0];
+				else if(!packet.isEmpty()) {
+					System.out.println("Game: Recv << " + packet);
+					
+					this.parsePacket(packet);
+					packet = "";
+				}
+			}
+		} catch(IOException e) {
+			System.err.println("Connection closed or error occurred: " + e.getMessage());
+		} finally {
+			try {
+				if (reader != null) reader.close();
+				if (writer != null) writer.close();
+				if (socket != null && !socket.isClosed()) socket.close();
+				
+				this.thread.interrupt();
+			}
+			catch(IOException e1) {
+				System.err.println("Error closing resources: " + e1.getMessage());
+			}
+		}
+	}
 
-            // Read the response
-            String response = in.readLine();
-            System.out.println("Received from server: " + response);
+	public void parsePacket(String packet) {
+		System.out.println(packet);
+		switch (this.status) {
+			case Status.wait_hash:
+				this.hash = packet.substring(2);
+				PacketManager.LOGIN_SEND_VERSION_PACKET(this.writer);
+				this.status = Status.wait_verification;
+				break;
+		}
+	}
 
-            return response;
+	public void sendUserInfos(String username, String password) {
+		password = Conversions.encryptPassword(password, this.hash);
+		PacketManager.LOGIN_SEND_USERNAME_PACKET(this.writer, username);
+		PacketManager.LOGIN_SEND_PASSWORD_PACKET(this.writer, password);
+		PacketManager.LOGIN_SEND_CONNEXION_PACKET(this.writer);
+	}
 
-        } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-            return "Error communicating with server.";
-        }
-    }
+	
+	private enum Status {
+		wait_hash("wait_hash", 0),
+		wait_verification("wait_verification", 1),
+		wait_password("wait_password", 2),
+		wait_nickname("wait_nickname", 3),
+		wait_server("wait_server", 4),
+		error("error", 5);
+		
+		private Status(final String s, final int n) {}
+	}
 }

@@ -65,12 +65,15 @@ public class SocketManager implements Runnable {
 	}
 
 	public void parsePacket(String packet) {
-		System.out.println(packet);
 		switch (this.status) {
 			case Status.wait_hash:
 				this.hash = packet.substring(2);
 				PacketManager.LOGIN_SEND_VERSION_PACKET(this.writer);
 				this.status = Status.wait_verification;
+				break;
+			case Status.wait_verification:
+				break;
+			case Status.error:
 				break;
 		}
 	}
@@ -86,10 +89,7 @@ public class SocketManager implements Runnable {
 	private enum Status {
 		wait_hash("wait_hash", 0),
 		wait_verification("wait_verification", 1),
-		wait_password("wait_password", 2),
-		wait_nickname("wait_nickname", 3),
-		wait_server("wait_server", 4),
-		error("error", 5);
+		error("error", 2);
 		
 		private Status(final String s, final int n) {}
 	}

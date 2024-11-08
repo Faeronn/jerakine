@@ -1,25 +1,39 @@
 package fr.jikosoft.kernel;
 
 import javax.swing.*;
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.Graphics;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import fr.jikosoft.managers.SocketManager;
+import fr.jikosoft.managers.LoginManager;
+import fr.jikosoft.objects.Cell;
+import fr.jikosoft.objects.Character;
 
 public class Jerakine extends JPanel {
-	private static SocketManager socketManager;
 	private static final int DEFAULT_FRAME_HEIGHT = 595;
 	private static final int DEFAULT_FRAME_WIDTH = 756;
 	private static final int COLS = 14;
 	private static final int ROWS = 16;
 
+	private Cell[][] cells = new Cell[ROWS * 2 - 1][COLS];
 	private static int frameWidth = DEFAULT_FRAME_WIDTH - COLS;
 	private static int tileWidth = frameWidth / COLS;
 	private static int tileHeight = tileWidth / 2;
 
+	private Character character;
+
 	public static void main(String[] args) {
+		//loginScreen();
+		mainGame();
+	}
+
+	public static void mainGame() {
 		JFrame frame = new JFrame("Isometric Game");
 		Jerakine panel = new Jerakine();
 
@@ -33,11 +47,26 @@ public class Jerakine extends JPanel {
 	}
 
 	public Jerakine() {
+		initializeCells();
+		character = new Character(1, "Xx_AlexDu30_xX", cells[5][5]);
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				updateTileDimensions();
+				initializeCells();
 				repaint();
+			}
+		});
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				handleCellClick(e.getX(), e.getY());
+			}
+		});
+		addMouseMotionListener(new MouseMotionAdapter() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				handleMouseHover(e.getX(), e.getY());
 			}
 		});
 	}
@@ -49,49 +78,55 @@ public class Jerakine extends JPanel {
 		tileHeight = (tileWidth / 2) + 1;
 	}
 
-	@Override
-	protected void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		int offsetX = tileWidth / 2;
-		int offsetY = 0;
+	private void initializeCells() {
 		int cellNumber = 15;
-
 		for (int row = 0; row <= (ROWS * 2) - 2; row++) {
 			for (int col = 0; col < (row % 2 == 0 ? COLS : COLS - 1); col++) {
-				int isoX;
-				int isoY;
-
-				if (row % 2 == 0) {
-					isoX = offsetX + col * tileWidth;
-					isoY = offsetY + row * (tileHeight / 2);
-				} else {
-					isoX = offsetX + tileWidth / 2 + col * tileWidth;
-					isoY = offsetY + row * (tileHeight / 2);
-				}
-
-				g.setColor(new Color(88, 157, 32));
-				g.fillPolygon(
-					new int[]{isoX, isoX + tileWidth / 2, isoX, isoX - tileWidth / 2},
-					new int[]{isoY, isoY + tileHeight / 2, isoY + tileHeight, isoY + tileHeight / 2},
-					4
-				);
-
-				g.setColor(Color.BLACK);
-				g.drawPolygon(
-					new int[]{isoX, isoX + tileWidth / 2, isoX, isoX - tileWidth / 2},
-					new int[]{isoY, isoY + tileHeight / 2, isoY + tileHeight, isoY + tileHeight / 2},
-					4
-				);
-
-				g.setColor(Color.BLACK);
-				String cellText = String.valueOf(cellNumber);
-				int textWidth = g.getFontMetrics().stringWidth(cellText);
-				int textHeight = g.getFontMetrics().getAscent();
-				g.drawString(cellText, isoX - textWidth / 2, isoY + tileHeight / 2 + textHeight / 4);
-
+				cells[row][col] = new Cell(col, row, tileWidth, tileHeight, new Color(88, 157, 32), cellNumber, col % 2 == 0);
 				cellNumber++;
 			}
 		}
+	}
+
+	private void handleCellClick(int mouseX, int mouseY) {
+		for (int row = 0; row < cells.length; row++) {
+			for (int col = 0; col < cells[row].length; col++) {
+				if (cells[row][col] != null && cells[row][col].contains(mouseX, mouseY) && cells[row][col].isClickable()) {
+					System.out.println("Clicked on Cell: " + cells[row][col].getCellID());
+					if (character != null) character.setCurrentCell(cells[row][col]);
+					repaint();
+					return;
+				}
+			}
+		}
+	}
+
+	private void handleMouseHover(int mouseX, int mouseY) {
+		boolean hovering = false;
+		for (int row = 0; row < cells.length; row++) {
+			for (int col = 0; col < cells[row].length; col++) {
+				if (cells[row][col] != null && cells[row][col].contains(mouseX, mouseY) && cells[row][col].isClickable()) {
+					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					hovering = true;
+					return;
+				}
+			}
+		}
+		if (!hovering) { setCursor(Cursor.getDefaultCursor());}
+	}
+
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		for (int row = 0; row < cells.length; row++) {
+			for (int col = 0; col < cells[row].length; col++) {
+				if (cells[row][col] != null) {
+					cells[row][col].draw(g);
+				}
+			}
+		}
+
+		if (character != null) {character.draw(g);}
 	}
 
 	public static void loginScreen() {
@@ -113,16 +148,7 @@ public class Jerakine extends JPanel {
 		JButton okButton = new JButton("OK");
 		okButton.setBounds(100, 90, 80, 25);
 
-		okButton.addActionListener(e -> {
-				socketManager = new SocketManager();
-				String username = userText.getText();
-				String password = new String(passText.getPassword());
-
-				socketManager.sendUserInfos(username, password);
-				JOptionPane.showMessageDialog(frame,
-				"Server Response: ",
-				"Server Response", JOptionPane.INFORMATION_MESSAGE);
-		});
+		okButton.addActionListener(e -> tryToLog(frame, userText.getText(), new String(passText.getPassword())));
 
 		frame.add(userLabel);
 		frame.add(userText);
@@ -131,5 +157,16 @@ public class Jerakine extends JPanel {
 		frame.add(okButton);
 
 		frame.setVisible(true);
+	}
+
+	private static void tryToLog(JFrame parent, String username, String password) {
+		new LoginManager(username, password, response -> {
+			SwingUtilities.invokeLater(() -> {
+				JOptionPane.showMessageDialog(parent,
+					"Server Response: " + response,
+					"Server Response",
+					JOptionPane.INFORMATION_MESSAGE);
+			});
+		});
 	}
 }

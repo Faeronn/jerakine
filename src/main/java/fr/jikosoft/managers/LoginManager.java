@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.function.Consumer;
 
 import fr.jikosoft.kernel.Conversions;
 
-public class SocketManager implements Runnable {
+public class LoginManager implements Runnable {
 	private static final String SERVER_URL = "localhost";
 	private static final int PORT = 4444;
 	private BufferedReader reader;
@@ -17,18 +18,27 @@ public class SocketManager implements Runnable {
 	private Socket socket;
 	private Status status;
 
+	private Consumer<String> responseHandler;
+	private String username;
+	private String password;
 	private String hash;
 
-	public SocketManager() {
+
+	public LoginManager(String username, String password, Consumer<String> responseHandler) {
 		try {
 			this.socket = new Socket(SERVER_URL, PORT);
 			this.reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
 			this.writer = new PrintWriter(this.socket.getOutputStream());
+
+			this.username = username;
+			this.password = password;
+			this.responseHandler = responseHandler;
 			
 			this.thread = new Thread(this);
 			this.thread.start();
 		} catch(IOException e) {
 			System.out.println("Unable to connect to the server: " + e.getMessage());
+			responseHandler.accept("Unable to connect to the server: " + e.getMessage());
 		}
 	}
 
@@ -67,17 +77,37 @@ public class SocketManager implements Runnable {
 	public void parsePacket(String packet) {
 		switch (this.status) {
 			case Status.wait_hash:
+				this.hash = packet.substring(2);
+				String hashedPassword = Conversions.encryptPassword(this.password, this.hash);
+				PacketManager.LOGIN_SEND_VERSION_PACKET(this.writer);
+				PacketManager.LOGIN_SEND_USERNAME_PACKET(this.writer, username);
+				PacketManager.LOGIN_SEND_PASSWORD_PACKET(this.writer, hashedPassword);
+				PacketManager.LOGIN_SEND_CONNEXION_PACKET(this.writer);
+				this.status = Status.wait_verification;
 				break;
 			case Status.wait_verification:
-				break;
+				String serverResponse = "";
+				switch (packet.substring(2, 4)) {
+					case "Ev":
+						serverResponse = "Invalid game version.";
+						break;
+					case "Ef":
+						serverResponse = "Incorrect username or password.";
+						break;
+					case "Er":
+						serverResponse = "Please choose a nickname.";
+						break;
+					case "Eb":
+						serverResponse = "This account is banned.";
+						break;
+					default:
+						serverResponse = "Unknown response: " + packet;
+				}
+				responseHandler.accept(serverResponse);
 			case Status.error:
 				break;
 		}
 	}
-
-	public void sendUserInfos(String username, String password) {
-	}
-
 	
 	private enum Status {
 		wait_hash("wait_hash", 0),

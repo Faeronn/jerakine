@@ -11,22 +11,24 @@ import java.awt.Cursor;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+import fr.jikosoft.managers.GameManager;
 import fr.jikosoft.managers.LoginManager;
 import fr.jikosoft.objects.Cell;
 import fr.jikosoft.objects.Character;
+import fr.jikosoft.objects.Map;
 
 public class Jerakine extends JPanel {
-	private static final int DEFAULT_FRAME_HEIGHT = 595;
-	private static final int DEFAULT_FRAME_WIDTH = 756;
-	private static final int COLS = 14;
-	private static final int ROWS = 16;
+	private static final int DEFAULT_FRAME_HEIGHT = 1207;
+	private static final int DEFAULT_FRAME_WIDTH = 1817;
+	public static final int MAP_WIDTH = 14;
+	public static final int MAP_HEIGHT = 16;
 
-	private Cell[][] cells = new Cell[ROWS * 2 - 1][COLS];
-	private static int frameWidth = DEFAULT_FRAME_WIDTH - COLS;
-	private static int tileWidth = frameWidth / COLS;
-	private static int tileHeight = tileWidth / 2;
+	private static int frameWidth = DEFAULT_FRAME_WIDTH - MAP_WIDTH;
+	public static int tileWidth = frameWidth / MAP_WIDTH;
+	public static int tileHeight = tileWidth / 2;
 
 	private Character character;
+    private Map map;
 
 	public static void main(String[] args) {
 		//loginScreen();
@@ -34,9 +36,10 @@ public class Jerakine extends JPanel {
 	}
 
 	public static void mainGame() {
+		//gameManager = new GameManager();
 		JFrame frame = new JFrame("Isometric Game");
 		Jerakine panel = new Jerakine();
-
+		panel.setBackground(new Color(34, 17, 49));
 		frame.add(panel);
 		frame.setSize(frameWidth, DEFAULT_FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,13 +50,13 @@ public class Jerakine extends JPanel {
 	}
 
 	public Jerakine() {
-		initializeCells();
-		character = new Character(1, "Xx_AlexDu30_xX", cells[5][5]);
+        map = new Map(1, "3C5257403AB182746205E9C40AD28915A4132B482756904EAC209D5879A4AE80746205E9C40AD28915A4132B482756904EAC209D58413AB182746205E9C40AD28915A4132B482756904EAC3C525778A4AEF0485D01E9C40AD28915A4132B482756904EAC209D5879A4AE80746205E9C40AD28915A4132B4827561EA92B209D58413AB182746205E9C40AD28915A4132B482756904EAC209D58413AB182746205E9C4CA237505A4132B482756904EAC209D58413AB182746205E9C40AD28915A4132B8FD415904EAC209D5879A4AE80746205E9C4CA237505A4132B482756904EAC209D5879A4AE80746205E9C40AD28915A4132B8FD4151EA92B209D58413AB182746205E9C4CA23758547EA0A482756904EAC209D58413AB182746205E9C40AD28915A4132B482756904EAC209D58413AB182746205E9C40AD28915A4132B8FD4151EA92B209D58413AB1827462E591BA02D28915A4132B482756904EAC209D58413AB1827462E591BA02D28915A4132B482756904EAC209D58413AB182746205E9C4CA237505A4132B8FD415904EAC209D58413AB182746205E9C40AD28915A4132B8FD415904EAC3C5257403AB182746205E9C4CA237505A4132B482756904EAC209D58413AB1827462E591BA02D28915A4132B482756904EAC209D58413AB182746205E9C40AD2899547EA0A482756904EAC209D58413AB1F2485D01E9C40AD28915A4132B482756904EAC209D58413AB1827462E591BA02D28915A4132B482756904EAC3C5257403AB1F2485D01E9C40AD2899547EA0A482756904EAC3C5257403AB1F2485DE191BA02D28915A4132B482756904EAC3C5257403AB182746205E9C40AD28915A4132B8FD415904EAC209D58413AB182746205E9C40AD2899547EA0A8FD415904EAC209D58413AB182746205E9C40AD2899547EA0A482756904EAC209D58413AB182746205E9C4CA23758547EA0A4827561EA92B209D58413AB182746205E9C40AD28915A4132B482756904EAC209D58413AB182746205E9C40AD28915A4132B482756904EAC209D5879A4AE80746205E9C40AD28915A4132B482756904EAC209D58413AB1F2485D01E9C40AD28915A4132B482756904EAC209D58413AB1827462E591BAC223758547EA0A482756904EAC209D58413AB182746205E9C40AD28915A4132B8FD415904EAC3C525778A4AE80746205E9C40AD28915A4132B8FD415904EAC209D58413AB1827462E591BAC223758547EA0A482756904EAC209D5879A4AE80746205E9C40AD28915A4132B482756904EAC209D58413AB182746205E9C40AD28915A4132B8FD415904EAC209D58413AB182746205E9C40AD28915A4132B8FD4151EA92B209D58413AB182746205E9C4CA237505A4132B482756904EAC209D58413AB1827462E591BAC223758547EA0A4827561EA92B209D58413AB1827462E591BA02D2899547EA0A8FD415904EAC3C5257403AB1827462E591BA02D28915A4132B482756904EAC209D58413AB1827462E591BA02D28915A4132B482756904EAC209D58413AB1827462E591BA02D28915A4132B8FD415904EAC209D58413AB182746205E9C40AD28915A4132B482756904EAC209D58413AB1F2485D01E9C40AD28915A4132B482756904EAC209D5879A4AE807462E591BA02D28915A4132B8FD415904EAC209D58413AB182746205E9C4CA237505A4132B482756904EAC209D58413AB1827462E591BA02D28915A4132B4827561EA92B209D5879A4AE80746205E9C40AD28915A4132B4827561EA92B209D5879A4AE807462E591BA02D28915A4132B482756904EAC209D58413AB182746205");
+		character = new Character(1, "Xx_AlexDu30_xX", map.getCells()[5][5]);
+
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
 				updateTileDimensions();
-				initializeCells();
 				repaint();
 			}
 		});
@@ -65,8 +68,8 @@ public class Jerakine extends JPanel {
 		});
 		addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
-			public void mouseMoved(MouseEvent e) {
-				handleMouseHover(e.getX(), e.getY());
+			public void mouseMoved(MouseEvent event) {
+				handleMouseHover(event.getX(), event.getY());
 			}
 		});
 	}
@@ -74,26 +77,20 @@ public class Jerakine extends JPanel {
 	private void updateTileDimensions() {
 		frameWidth = getWidth();
 
-		tileWidth = frameWidth / COLS;
+		tileWidth = frameWidth / MAP_WIDTH;
 		tileHeight = (tileWidth / 2) + 1;
 	}
 
-	private void initializeCells() {
-		int cellNumber = 15;
-		for (int row = 0; row <= (ROWS * 2) - 2; row++) {
-			for (int col = 0; col < (row % 2 == 0 ? COLS : COLS - 1); col++) {
-				cells[row][col] = new Cell(col, row, tileWidth, tileHeight, new Color(88, 157, 32), cellNumber, col % 2 == 0);
-				cellNumber++;
-			}
-		}
-	}
-
 	private void handleCellClick(int mouseX, int mouseY) {
+		Cell[][] cells = map.getCells();
 		for (int row = 0; row < cells.length; row++) {
 			for (int col = 0; col < cells[row].length; col++) {
 				if (cells[row][col] != null && cells[row][col].contains(mouseX, mouseY) && cells[row][col].isClickable()) {
 					System.out.println("Clicked on Cell: " + cells[row][col].getCellID());
-					if (character != null) character.setCurrentCell(cells[row][col]);
+					if (character != null) {
+						character.setCurrentCell(cells[row][col]);
+						//gameManager.sendMovement(character);
+					}
 					repaint();
 					return;
 				}
@@ -102,6 +99,7 @@ public class Jerakine extends JPanel {
 	}
 
 	private void handleMouseHover(int mouseX, int mouseY) {
+		Cell[][] cells = map.getCells();
 		boolean hovering = false;
 		for (int row = 0; row < cells.length; row++) {
 			for (int col = 0; col < cells[row].length; col++) {
@@ -118,6 +116,8 @@ public class Jerakine extends JPanel {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+
+		Cell[][] cells = map.getCells();
 		for (int row = 0; row < cells.length; row++) {
 			for (int col = 0; col < cells[row].length; col++) {
 				if (cells[row][col] != null) {

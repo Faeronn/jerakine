@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 
 import fr.jikosoft.kernel.Constants;
 import fr.jikosoft.kernel.Conversions;
+import fr.jikosoft.objects.Character;
 
 public class PacketManager {
 	public static void send(PrintWriter writer, String packet) {
@@ -35,5 +36,11 @@ public class PacketManager {
 		String packet = "Af";
 		send(writer, packet);
 		System.out.println("Login: Send >> " + packet);
+	}
+
+	public static void GAME_SEND_MOVE_PACKET(PrintWriter writer, Character character) {
+		String packet = "Md|" + character.getCharacterID() + '|' + character.getCurrentCell().getCellID();
+		send(writer, packet);
+		System.out.println("Game: Send >> " + packet);
 	}
 }

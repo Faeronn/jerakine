@@ -13,9 +13,6 @@ public class Character {
 		this.currentCell = currentCell;
 	}
 
-	public void setCurrentCell(Cell cell) {this.currentCell = cell;}
-
-
 	public void draw(Graphics g) {
 		if (currentCell == null) return;
 		int isoX = currentCell.getIsometricX();
@@ -28,7 +25,10 @@ public class Character {
 		g.setColor(Color.BLACK);
 		g.drawString(name, isoX - g.getFontMetrics().stringWidth(name) / 2, isoY - size / 2 - 5);
 	}
-
+	public Cell getCurrentCell() {return this.currentCell;}
 	public int getCharacterID() {return this.characterID;}
 	public String getName() {return this.name;}
+
+	
+	public void setCurrentCell(Cell cell) {this.currentCell = cell;}
 }

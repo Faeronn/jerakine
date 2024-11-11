@@ -69,18 +69,14 @@ public class Map {
 		}
 	}
 
-	public Cell getCellAt(int mouseX, int mouseY) {
-		for (int row = 0; row < cells.length; row++) {
-			for (int col = 0; col < cells[row].length; col++) {
-				if (cells[row][col] != null && cells[row][col].contains(mouseX, mouseY)) {
-					return cells[row][col];
-				}
-			}
-		}
+	public Cell getCellAt(int x, int y) {
+		if(x >= 0 && x < height && y >= 0 && y < width) return this.cells[x][y];
 		return null;
 	}
 
 	
 	public Cell[][] getCells() {return this.cells;}
 	public int getMapID() {return this.mapID;}
+	public int getHeight() {return this.height;}
+	public int getWidth() {return this.width;}
 }

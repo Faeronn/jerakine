@@ -70,4 +70,18 @@ public class Cell {
 	public int getIsometricX() {return this.isometricX;}
 	public int getIsometricY() {return this.isometricY;}
 	public Color getFillColor() {return this.fillColor;}
+	
+	public int getGridX() {return this.gridX;}
+	public int getGridY() {return this.gridY;}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null || getClass() != obj.getClass()) return false;
+		Cell other = (Cell) obj;
+		return gridX == other.gridX && gridY == other.gridY;
+	}
+
+	@Override
+	public int hashCode() {return 31 * gridX + gridY;}
 }

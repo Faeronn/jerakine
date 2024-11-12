@@ -70,7 +70,7 @@ public class Map {
 	}
 
 	public Cell getCellAt(int x, int y) {
-		if(x >= 0 && x < height && y >= 0 && y < width) return this.cells[x][y];
+		if(x >= 0 && x < width && y >= 0 && y < height * 2 - 1) return this.cells[y][x];
 		return null;
 	}
 

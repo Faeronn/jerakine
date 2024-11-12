@@ -56,13 +56,14 @@ public class Pathfinding {
 					neighborNode.h = heuristic(neighbor, goal);
 					neighborNode.parent = current;
 
-					if (!openSet.contains(neighborNode)) openSet.add(neighborNode);
+					if (openSet.contains(neighborNode)) openSet.remove(neighborNode);
+					openSet.add(neighborNode);
 				}
 			}
 		}
 
 		System.out.println("No path found.");
-		return Collections.emptyList(); // Return an empty path if no path is found
+		return Collections.emptyList();
 	}
 
 	private List<Cell> reconstructPath(Node node) {
@@ -75,12 +76,12 @@ public class Pathfinding {
 		return path;
 	}
 
-	private List<Cell> getNeighbors(Cell cell) {
+	public List<Cell> getNeighbors(Cell cell) {
 		List<Cell> neighbors = new ArrayList<>();
 		int row = cell.getGridY();
 		int col = cell.getGridX();
 
-		int[][] directions = {
+		int[][] evenDirections = {
 			{1, 1},   // down-right
 			{1, -1},  // up-right
 			{0, 1},  // down-left
@@ -91,12 +92,25 @@ public class Pathfinding {
 			{-1, 0}   // horizontal left
 		};
 
+		int[][] oddDirections = {
+			{0, 1},   // down-right
+			{0, -1},  // up-right
+			{-1, 1},  // down-left
+			{-1, -1}, // up-left
+			{0, 2},   // vertical up
+			{0, -2},  // vertical down
+			{1, 0},   // horizontal right
+			{-1, 0}   // horizontal left
+		};
+
+		int[][] directions = ((row + 1) % 2 == 0) ? evenDirections : oddDirections;
+
 		for (int[] direction : directions) {
-			int newRow = row + direction[1];
 			int newCol = col + direction[0];
+			int newRow = row + direction[1];
 
 			if (newRow >= 0 && newRow < map.getHeight() * 2 - 1 && newCol >= 0 && newCol < (newRow % 2 == 0 ? map.getWidth() : map.getWidth() - 1)) {
-				Cell neighbor = map.getCellAt(newRow, newCol);
+				Cell neighbor = map.getCellAt(newCol, newRow);
 				if (neighbor != null) neighbors.add(neighbor);
 			}
 		}
@@ -107,14 +121,14 @@ public class Pathfinding {
 		int dx = Math.abs(a.getGridX() - b.getGridX());
 		int dy = Math.abs(a.getGridY() - b.getGridY());
 
-		return dx + dy;
+		return dx + dy - Math.min(dx, dy);
 	}
-	
 
 	private double distance(Cell a, Cell b) {
 		int dx = Math.abs(a.getGridX() - b.getGridX());
 		int dy = Math.abs(a.getGridY() - b.getGridY());
-		return (dx + dy) == 2 ? 1.414 : 1;
+
+		return (dx == dy) ? 1.4142 : (dx + dy);
 	}
 
 	private static class Node {

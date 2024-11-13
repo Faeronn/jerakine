@@ -29,27 +29,18 @@ public class Pathfinding {
 		while (!openSet.isEmpty()) {
 			Node current = openSet.poll();
 
-			if (current.cell == goal) {
-				System.out.println("Goal reached. Reconstructing path...");
-				return reconstructPath(current);
-			}
+			if (current.cell == goal) return reconstructPath(current);
 
 			for (Cell neighbor : getNeighbors(current.cell)) {
 				if (!neighbor.isClickable()) continue;
 
 				double tentativeG = current.g + distance(current.cell, neighbor);
-				System.out.println("CellID : " + neighbor.getCellID() + " | tentativeG : " + tentativeG);
 
 				Node neighborNode = allNodes.get(neighbor);
 				if (neighborNode == null) {
 					neighborNode = new Node(neighbor);
 					allNodes.put(neighbor, neighborNode);
 				}
-
-				System.out.println("Checking neighbor: " + neighbor.getCellID() + 
-                   ", current.g: " + current.g + 
-                   ", tentativeG: " + tentativeG + 
-                   ", neighborNode.g: " + neighborNode.g);
 
 				if (tentativeG < neighborNode.g) {
 					neighborNode.g = tentativeG;
@@ -69,7 +60,6 @@ public class Pathfinding {
 	private List<Cell> reconstructPath(Node node) {
 		List<Cell> path = new ArrayList<>();
 		while (node != null) {
-			System.out.println(node.cell.getCellID());
 			path.add(0, node.cell);
 			node = node.parent;
 		}

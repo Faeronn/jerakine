@@ -3,7 +3,6 @@ package fr.jikosoft.objects;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Polygon;
-import java.util.Arrays;
 
 public class Cell {
 	private int cellID;
@@ -47,25 +46,14 @@ public class Cell {
 	}
 
 	public void draw(Graphics graphic) {
-		int[] xPoints = {
-			isometricX,
-			isometricX + tileWidth / 2,
-			isometricX,
-			isometricX - tileWidth / 2
-		};
-		int[] yPoints = {
-			isometricY - tileHeight,
-			isometricY + tileLength / 2 - tileHeight,
-			isometricY + tileLength - tileHeight,
-			isometricY + tileLength / 2 - tileHeight
-		};
+		int[] xPoints = { isometricX, isometricX + tileWidth / 2, isometricX, isometricX - tileWidth / 2 };
+		int[] yPoints = { isometricY - tileHeight, isometricY + tileLength / 2 - tileHeight, isometricY + tileLength - tileHeight, isometricY + tileLength / 2 - tileHeight };
 		graphic.setColor(fillColor);
 		graphic.fillPolygon(xPoints, yPoints, 4);
 
 		graphic.setColor(new Color(255, 255, 255, 96));
 		graphic.drawPolygon(xPoints, yPoints, 4);
 
-		// Draw height sides if applicable
 		if (tileHeight > 0) {
 			graphic.setColor(fillColor.darker());
 
@@ -76,39 +64,20 @@ public class Cell {
 			//Left side
 			graphic.fillPolygon(
 				new int[]{ xPoints[0], xPoints[0], xPoints[3], xPoints[3] },
-				new int[]{ yPoints[2] + tileHeight, yPoints[2], yPoints[1], yPoints[1] + tileHeight },
-				4
-			);
+				new int[]{ yPoints[2] + tileHeight, yPoints[2], yPoints[1], yPoints[1] + tileHeight }, 4);
 			graphic.setColor(new Color(255, 255, 255, 96));
 		}
-	
-		// Draw cell ID
+
 		String cellText = String.valueOf(this.cellID);
 		int textWidth = graphic.getFontMetrics().stringWidth(cellText);
 		int textHeight = graphic.getFontMetrics().getAscent();
 		graphic.drawString(cellText, isometricX - textWidth / 2, isometricY + tileLength / 2 - tileHeight + textHeight / 4);
 	}
-	
 
-	public void draw2(Graphics graphic) {
-		graphic.setColor(fillColor);
-		graphic.fillPolygon(
-			new int[]{isometricX, isometricX + tileWidth / 2, isometricX, isometricX - tileWidth / 2},
-			new int[]{isometricY, isometricY + tileLength / 2, isometricY + tileLength, isometricY + tileLength / 2},
-			4
-		);
-
-		graphic.setColor(new Color(255, 255, 255, 96));
-		graphic.drawPolygon(
-			new int[]{isometricX, isometricX + tileWidth / 2, isometricX, isometricX - tileWidth / 2},
-			new int[]{isometricY, isometricY + tileLength / 2, isometricY + tileLength, isometricY + tileLength / 2},
-			4
-		);
-
-		String cellText = String.valueOf(this.cellID);
-		int textWidth = graphic.getFontMetrics().stringWidth(cellText);
-		int textHeight = graphic.getFontMetrics().getAscent();
-		graphic.drawString(cellText, isometricX - textWidth / 2, isometricY + tileLength / 2 + textHeight / 4);
+	public void updateTileDimensions(int newTileWidth, int newTileLength) {
+		this.tileWidth = newTileWidth;
+		this.tileLength = newTileLength;
+		calculateIsometricPosition();
 	}
 
 	public int getCellID() {return this.cellID;}

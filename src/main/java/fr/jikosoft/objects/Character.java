@@ -2,8 +2,12 @@ package fr.jikosoft.objects;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
+
+import fr.jikosoft.kernel.Constants;
 
 public class Character {
+	private Direction currentDirection;
 	private Cell currentCell;
 	private int characterID;
 	private Stats stats;
@@ -14,6 +18,7 @@ public class Character {
 		this.currentCell = currentCell;
 		this.name = name;
 		this.stats = new Stats(0, 0, 0);
+		this.currentDirection = Direction.SOUTH;
 	}
 
 	public void draw(Graphics g) {
@@ -21,12 +26,19 @@ public class Character {
 		int isoX = currentCell.getIsometricX();
 		int isoY = currentCell.getIsometricY();
 
-		int size = 20;
-		g.setColor(Color.RED);
-		g.fillOval(isoX - size / 2, isoY - size / 2, size, size);
-
-		g.setColor(Color.BLACK);
-		g.drawString(name, isoX - g.getFontMetrics().stringWidth(name) / 2, isoY - size / 2 - 5);
+		Image sprite = Constants.CHARACTER_SPRITES.get(this.currentDirection);
+		if (sprite != null) {
+			int size = sprite.getWidth(null);
+			g.drawImage(sprite, isoX - size / 2, isoY - size / 2, null);
+			g.setColor(Color.BLACK);
+			g.drawString(name, isoX - g.getFontMetrics().stringWidth(name) / 2, isoY - size / 2 - 5);
+		} else {
+			int size = 20;
+			g.setColor(Color.RED);
+			g.fillOval(isoX - size / 2, isoY - size / 2, size, size);
+			g.setColor(Color.BLACK);
+			g.drawString(name, isoX - g.getFontMetrics().stringWidth(name) / 2, isoY - size / 2 - 5);
+		}
 	}
 
 	public Cell getCurrentCell() {return this.currentCell;}

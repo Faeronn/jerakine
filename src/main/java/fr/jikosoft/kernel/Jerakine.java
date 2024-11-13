@@ -5,19 +5,14 @@ import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 import java.awt.Graphics;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import fr.jikosoft.managers.GameManager;
 import fr.jikosoft.managers.LoginManager;
 import fr.jikosoft.objects.Cell;
 import fr.jikosoft.objects.Character;
@@ -33,7 +28,8 @@ public class Jerakine extends JPanel {
 	public static int tileWidth = frameWidth / MAP_WIDTH;
 	public static int tileHeight = tileWidth / 2;
 
-	private static GameManager gameManager;
+	//private static GameManager gameManager;
+	//private static JPanel menu;
 	private Character character;
 	private Timer moveTimer;
 	private Map map;
@@ -49,7 +45,8 @@ public class Jerakine extends JPanel {
 		Jerakine panel = new Jerakine();
 		panel.setBackground(new Color(34, 17, 49));
 
-		JPanel menu = new JPanel();
+		/*
+		menu = new JPanel();
 		menu.setLayout(new FlowLayout(FlowLayout.CENTER));
 		menu.setBackground(Color.gray);
 		menu.setPreferredSize(new Dimension(DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT - (tileHeight * MAP_HEIGHT + tileHeight)));
@@ -75,14 +72,14 @@ public class Jerakine extends JPanel {
 		stats.add(healthLabel);
 		menu.add(stats);
 
-		frame.add(menu, BorderLayout.SOUTH);
+		frame.add(menu, BorderLayout.SOUTH); */
 
 		frame.add(panel);
 		frame.setSize(DEFAULT_FRAME_WIDTH, DEFAULT_FRAME_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 
-		Timer timer = new Timer(16, e -> panel.repaint());
+		Timer timer = new Timer(16, _ -> panel.repaint());
 		timer.start();
 	}
 
@@ -116,7 +113,25 @@ public class Jerakine extends JPanel {
 
 		tileWidth = frameWidth / MAP_WIDTH;
 		tileHeight = (tileWidth / 2) + 1;
+
+		Cell[][] cells = map.getCells();
+		for (int row = 0; row < cells.length; row++) {
+			for (int col = 0; col < cells[row].length; col++) {
+				if (cells[row][col] != null) {
+					cells[row][col].updateTileDimensions(tileWidth, tileHeight);
+				}
+			}
+		}
 	}
+	/*
+	private void updateMenuDimensions() {
+        int newWidth = getWidth();
+        int newHeight = getHeight() - tileHeight * MAP_HEIGHT + tileHeight;
+
+        menu.setPreferredSize(new Dimension(newWidth, newHeight));
+        menu.revalidate();
+        menu.repaint();
+	} */
 
 	private void handleCellClick(int mouseX, int mouseY) {
 		Pathfinding pathfinding = new Pathfinding(map);
@@ -203,7 +218,7 @@ public class Jerakine extends JPanel {
 		JButton okButton = new JButton("OK");
 		okButton.setBounds(100, 90, 80, 25);
 
-		okButton.addActionListener(e -> tryToLog(frame, userText.getText(), new String(passText.getPassword())));
+		okButton.addActionListener(_ -> tryToLog(frame, userText.getText(), new String(passText.getPassword())));
 
 		frame.add(userLabel);
 		frame.add(userText);
